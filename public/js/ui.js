@@ -7,12 +7,8 @@ function commandCards() {
   }) || [];
 }
 
-function renderCommandGrid() {
-  const grid = byId('command-grid');
-  if (!grid) return;
-
-  const cards = commandCards();
-  grid.innerHTML = cards.length
+function renderCommandCards(cards) {
+  return cards.length
     ? cards.map(card => `
         <div class="command-item">
           <div class="command-name">${esc(card.name)}</div>
@@ -21,6 +17,12 @@ function renderCommandGrid() {
         </div>
       `).join('')
     : '<div class="command-item"><div class="command-desc">表示できるコマンドはありません</div></div>';
+}
+
+function renderCommandGrid() {
+  const grid = byId('command-grid');
+  if (!grid) return;
+  grid.innerHTML = renderCommandCards(commandCards());
 }
 
 function setChatIdentity(account) {
@@ -49,27 +51,26 @@ function syncChatChrome(account) {
   renderCommandGrid();
 }
 
+function renderAdminTimeline(history, allPrivateMessages) {
+  const merged = [
+    ...(history || []).map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
+    ...(allPrivateMessages || []).map(pm => ({ kind: 'private-monitor', timestamp: +new Date(pm.timestamp), payload: pm })),
+  ].sort((a, b) => a.timestamp - b.timestamp);
+
+  merged.forEach(entry => {
+    if (entry.kind === 'message') addMsg(entry.payload);
+    else addPmMonitor(entry.payload);
+  });
+}
+
 function renderInitialTimeline(res) {
-  const history = res.history || [];
-  const privateMessages = res.privateMessages || [];
-
   byId('chat-box').innerHTML = '';
-
   if (App.isAdmin && res.allPrivateMessages?.length) {
-    const merged = [
-      ...history.map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
-      ...res.allPrivateMessages.map(pm => ({ kind: 'private-monitor', timestamp: +new Date(pm.timestamp), payload: pm })),
-    ].sort((a, b) => a.timestamp - b.timestamp);
-
-    merged.forEach(entry => {
-      if (entry.kind === 'message') addMsg(entry.payload);
-      else addPmMonitor(entry.payload);
-    });
+    renderAdminTimeline(res.history, res.allPrivateMessages);
     return;
   }
-
-  history.forEach(addMsg);
-  privateMessages.forEach(addPm);
+  (res.history || []).forEach(addMsg);
+  (res.privateMessages || []).forEach(addPm);
 }
 
 /**

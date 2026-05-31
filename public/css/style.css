@@ -1134,3 +1134,196 @@ a:hover {
     height: min(74vh, 840px);
   }
 }
+
+
+/* === responsive polish =================================================== */
+#chat-section {
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(12px, 2vw, 32px);
+}
+
+.chat-shell {
+  width: min(100%, 1920px);
+  margin: 0 auto;
+}
+
+.chat-grid {
+  grid-template-columns: minmax(0, 1.72fr) minmax(340px, 420px);
+  gap: clamp(16px, 1.4vw, 24px);
+  align-items: start;
+}
+
+.chat-main {
+  min-width: 0;
+}
+
+.chat-side {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.chat-side .section-box {
+  width: 100%;
+}
+
+.command-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-height: 52vh;
+  overflow: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
+}
+
+.command-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.command-grid::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+.command-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+@media (min-width: 1440px) {
+  .chat-shell {
+    width: min(100%, 2040px);
+  }
+
+  .chat-grid {
+    grid-template-columns: minmax(0, 1.9fr) minmax(360px, 460px);
+  }
+
+  #chat-box {
+    height: min(74vh, 860px);
+  }
+}
+
+@media (max-width: 1199px) {
+  .chat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-side {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .command-grid {
+    max-height: 44vh;
+  }
+}
+
+@media (max-width: 800px) {
+  #chat-section {
+    padding-inline: 12px;
+  }
+
+  .chat-shell {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .chat-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-main,
+  .panel {
+    padding: 16px;
+  }
+
+  .identity-row,
+  .presence-row,
+  .composer-meta,
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .composer-actions,
+  .profile-actions {
+    width: 100%;
+  }
+
+  .composer-actions > button,
+  .profile-actions > button,
+  .modal-actions > button,
+  .identity-row > button {
+    width: 100%;
+  }
+
+  #chat-box {
+    height: 60vh;
+    min-height: 360px;
+  }
+
+  .command-grid {
+    max-height: 38vh;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-box {
+    padding: 22px 18px;
+  }
+
+  .chat-shell {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .chat-main,
+  .panel {
+    padding: 14px;
+  }
+
+  .btn-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-row button {
+    width: 100%;
+  }
+
+  #reply-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #reply-bar button {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .msg-actions {
+    opacity: 1;
+  }
+
+  .msg {
+    padding: 10px 11px;
+  }
+
+  #new-msg-notice {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+  }
+
+  #new-msg-notice.hidden {
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  .command-grid {
+    max-height: 34vh;
+  }
+}
