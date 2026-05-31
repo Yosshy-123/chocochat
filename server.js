@@ -7,11 +7,14 @@ const trustProxy = require('./trustProxy');
 const db         = require('./db');
 const session    = require('./lib/session');
 const { createSocketServer, setMsgCache } = require('./socket');
+const { applySecurityHeaders } = require('./lib/security');
 
 const app    = express();
 const server = http.createServer(app);
+const httpsEnabled = String(process.env.HTTPS || '').toLowerCase() === 'true';
 
 trustProxy.configureExpress(app);
+app.use((req, res, next) => applySecurityHeaders(req, res, next, { httpsEnabled }));
 app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'deny' }));
 
 async function start() {

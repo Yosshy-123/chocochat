@@ -318,9 +318,10 @@ a:hover {
 
 /* ══ チャット ══ */
 #chat-section {
-  max-width: 880px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
-  padding: 14px 20px 28px;
+  padding: 18px clamp(16px, 2.2vw, 32px) 32px;
 }
 
 .chat-header {
@@ -394,7 +395,7 @@ a:hover {
   color: var(--sys-text);
   font-style: italic;
   min-height: 16px;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
 }
 
 .chat-box-shell {
@@ -1037,5 +1038,99 @@ a:hover {
 
   .command-grid {
     grid-template-columns: 1fr;
+  }
+}
+/* === レイアウトの拡張 ===================================================== */
+.chat-shell {
+  width: min(1680px, 100%);
+  margin: 0 auto;
+}
+
+.chat-grid {
+  grid-template-columns: minmax(0, 2.1fr) minmax(360px, 0.9fr);
+}
+
+.chat-main,
+.chat-side {
+  min-width: 0;
+}
+
+.section-box {
+  width: 100%;
+}
+
+@media (min-width: 1600px) {
+  .chat-shell {
+    width: min(1820px, 100%);
+  }
+
+  .chat-grid {
+    grid-template-columns: minmax(0, 2.35fr) minmax(380px, 0.95fr);
+  }
+
+  #chat-box {
+    height: min(74vh, 840px);
+  }
+}
+
+/* === レイアウト拡張 ======================================================= */
+#chat-section {
+  width: 100%;
+  max-width: none;
+  padding: 20px clamp(16px, 2vw, 32px) 32px;
+}
+
+.chat-shell {
+  width: min(1720px, 100%);
+  margin: 0 auto;
+}
+
+.chat-header {
+  text-align: left;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.chat-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(340px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.chat-main,
+.chat-side {
+  min-width: 0;
+}
+
+.chat-main {
+  display: grid;
+  gap: 0;
+}
+
+.chat-side {
+  display: grid;
+  gap: 20px;
+}
+
+.section-box {
+  width: 100%;
+}
+
+#chat-box {
+  height: min(70vh, 760px);
+}
+
+@media (min-width: 1600px) {
+  .chat-shell {
+    width: min(1880px, 100%);
+  }
+
+  .chat-grid {
+    grid-template-columns: minmax(0, 2.35fr) minmax(380px, 0.95fr);
+  }
+
+  #chat-box {
+    height: min(74vh, 840px);
   }
 }
