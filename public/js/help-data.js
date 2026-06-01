@@ -6,7 +6,6 @@ window.CommandHelp = {
     { name: '/omikuji', desc: 'おみくじを引く' },
     { name: '/dice',    desc: 'サイコロを振る（1〜6）' },
     { name: '/coin',    desc: 'コインを投げる（表/裏）' },
-    { name: '/color',   desc: '名前の色を変更', example: '例: /color #ff0000' },
     { name: '/pm',      desc: '個別メッセージを送信', example: '例: /pm ユーザーID 内容' },
   ],
 
