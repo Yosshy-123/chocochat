@@ -16,6 +16,27 @@ function appendToChat(el) {
   }
 }
 
+function insertTimelineItem(el) {
+  const box = byId('chat-box');
+  const ts = Number(el.dataset.ts || 0);
+  if (!box || !ts) return appendToChat(el);
+
+  const before = [...box.children].find(child => {
+    const childTs = Number(child.dataset?.ts || 0);
+    return childTs && childTs > ts;
+  });
+
+  const wasAtBottom = App.isAtBottom;
+  if (before) box.insertBefore(el, before);
+  else box.appendChild(el);
+
+  if (wasAtBottom) {
+    box.scrollTop = box.scrollHeight;
+  } else {
+    byId('new-msg-notice')?.classList.remove('hidden');
+  }
+}
+
 function addMsg(m) {
   const wrap = document.createElement('div');
   wrap.className = 'msg';
@@ -23,6 +44,7 @@ function addMsg(m) {
   wrap.dataset.senderId = m.senderId || '';
   wrap.dataset.senderUsername = m.senderUsername || '';
   wrap.dataset.msgtext = (m.message || '').slice(0, 80);
+  wrap.dataset.ts = String(+new Date(m.timestamp || Date.now()));
 
   const isMine = m.senderId === App.myUserId;
   const replyHtml = buildReplyPreviewHtml(m.replyTo);
@@ -43,7 +65,7 @@ function addMsg(m) {
 <div class="msg-actions">${repBtn}${editBtn}${delBtn}</div>`;
 
   wrap.querySelector('.msg-uname').style.color = safeColor(m.color);
-  appendToChat(wrap);
+  insertTimelineItem(wrap);
 }
 
 function refreshReplyPreviews(message) {
@@ -67,36 +89,38 @@ function addPm(pm) {
   const isMine = pm.fromId === App.myUserId;
   wrap.className = `pm-wrap ${isMine ? 'pm-outgoing' : 'pm-incoming'}`;
   wrap.dataset.pmid = pm.id;
+  wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
 
   const dir = isMine ? `→ ${esc(pm.toId)}` : `← ${esc(pm.fromId)}`;
   const route = `${esc(pm.fromId || '')} → ${esc(pm.toId || '')}`;
   wrap.innerHTML =
-    `<div class="pm-head">
-       <div class="pm-label">🔒 PM</div>
+    `<div class="msg-head pm-head">
+       <span class="pm-label">PM</span>
        <div class="pm-meta">
          <span class="pm-chip">${dir}</span>
          <span class="pm-chip">${fmtTime(pm.timestamp)}</span>
        </div>
      </div>` +
     `<div class="pm-route">${route}</div>` +
-    `<div class="msg-body">${renderMessageBody(pm.message)}</div>` +
-    `<div class="msg-actions"><button class="act" data-action="dpm">削除</button></div>`;
-  appendToChat(wrap);
+    `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
+  insertTimelineItem(wrap);
 }
 
 function addPmMonitor(pm) {
   const wrap = document.createElement('div');
   wrap.className = 'pm-monitor';
+  wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
   wrap.innerHTML =
-    `<div class="pm-head">
-       <div class="pm-mon-label">👁 PM監視</div>
+    `<div class="msg-head pm-head">
+       <span class="pm-mon-label">PM監視</span>
        <div class="pm-meta">
          <span class="pm-chip">${esc(pm.fromId || '')} → ${esc(pm.toId || '')}</span>
          <span class="pm-chip">${fmtTime(pm.timestamp)}</span>
        </div>
      </div>` +
+    `<div class="pm-route">${esc(pm.fromId || '')} → ${esc(pm.toId || '')}</div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
-  appendToChat(wrap);
+  insertTimelineItem(wrap);
 }
 
 byId('chat-box').addEventListener('click', e => {
@@ -118,12 +142,6 @@ byId('chat-box').addEventListener('click', e => {
   if (action === 'delete' && wrap) {
     if (!confirm('削除しますか？')) return;
     socket.emit('deleteMessage', { id: wrap.dataset.msgid }, res => {
-      if (!res?.success) alert(res?.error || '削除に失敗しました');
-    });
-  }
-  if (action === 'dpm' && pmWrap) {
-    if (!confirm('削除しますか？')) return;
-    socket.emit('deletePrivateMessage', { id: pmWrap.dataset.pmid }, res => {
       if (!res?.success) alert(res?.error || '削除に失敗しました');
     });
   }

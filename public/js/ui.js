@@ -69,8 +69,16 @@ function renderInitialTimeline(res) {
     renderAdminTimeline(res.history, res.allPrivateMessages);
     return;
   }
-  res.history.forEach(addMsg);
-  res.privateMessages.forEach(addPm);
+
+  const merged = [
+    ...res.history.map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
+    ...res.privateMessages.map(pm => ({ kind: 'private', timestamp: +new Date(pm.timestamp), payload: pm })),
+  ].sort((a, b) => a.timestamp - b.timestamp);
+
+  merged.forEach(entry => {
+    if (entry.kind === 'message') addMsg(entry.payload);
+    else addPm(entry.payload);
+  });
 }
 
 /**

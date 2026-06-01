@@ -573,52 +573,45 @@ a:hover {
 .pm-wrap,
 .pm-monitor {
   position: relative;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-radius: 12px;
+  padding: 9px 12px;
+  margin-bottom: 7px;
+  border-radius: 10px;
   border: 1px solid var(--border);
+  background: var(--msg-bg);
 }
 
 .pm-wrap {
-  background: linear-gradient(180deg, var(--pm-out-bg), rgba(255, 255, 255, 0.02));
-  border-left: 3px solid var(--pm-out-border);
+  border-left: 3px solid var(--reply-border);
+  box-shadow: none;
 }
 
-.pm-wrap.pm-outgoing {
-  box-shadow: inset 0 0 0 1px rgba(52, 152, 219, .08);
-}
-
+.pm-wrap.pm-outgoing,
 .pm-wrap.pm-incoming {
-  box-shadow: inset 0 0 0 1px rgba(52, 152, 219, .04);
+  background: var(--msg-bg);
 }
 
 .pm-monitor {
-  background: linear-gradient(180deg, var(--pm-mon-bg), rgba(255, 255, 255, 0.02));
-  border-left: 3px solid var(--pm-mon-border);
+  border-left: 3px solid var(--border);
+  opacity: .96;
 }
 
 .pm-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .pm-label,
 .pm-mon-label {
   font-size: 11px;
-  font-weight: bold;
-  letter-spacing: .04em;
+  font-weight: 700;
+  letter-spacing: .03em;
 }
 
 .pm-label {
-  color: var(--pm-out-border);
+  color: var(--reply-border);
 }
 
 .pm-mon-label {
-  color: var(--pm-mon-border);
+  color: var(--muted);
 }
 
 .pm-meta {
@@ -645,7 +638,7 @@ a:hover {
   font-size: 11px;
   color: var(--muted);
   font-family: monospace;
-  opacity: .9;
+  opacity: .75;
 }
 
 /* 返信バー */
