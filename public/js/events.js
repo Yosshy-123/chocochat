@@ -3,7 +3,6 @@
 socket.on('message', addMsg);
 socket.on('systemMessage', t => { if (typeof t === 'string') addSys(t); });
 socket.on('privateMessage', addPm);
-socket.on('privateMessageSent', addPm);
 socket.on('privateMessageMonitor', addPmMonitor);
 
 socket.on('messageUpdated', m => {
@@ -23,11 +22,11 @@ socket.on('privateMessageDeleted', ({ id }) => document.querySelector(`.pm-wrap[
 
 socket.on('userJoined', d => {
   addSys(`${d.username} (${d.userId}) が入室しました`);
-  updateUserList(d.users || [], d.userCount, d.userStatuses);
+  updateUserList(d.users, d.userCount, d.userStatuses);
 });
 socket.on('userLeft', d => {
   addSys(`${d.username} (${d.userId}) が退室しました`);
-  updateUserList(d.users || [], d.userCount, d.userStatuses);
+  updateUserList(d.users, d.userCount, d.userStatuses);
   App.typingMap.delete(d.userId);
   updateTypingDisplay();
 });

@@ -77,7 +77,8 @@ async function saveMute(userId, until, mutedById) {
 }
 
 async function clearMute(userId) {
-  await pool.query('DELETE FROM mutes WHERE user_id=$1', [userId]);
+  const res = await pool.query('DELETE FROM mutes WHERE user_id=$1 RETURNING user_id', [userId]);
+  return res.rows.length > 0;
 }
 
 async function getActiveMutes() {

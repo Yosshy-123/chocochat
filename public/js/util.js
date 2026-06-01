@@ -80,19 +80,16 @@ function formatReplyPreview(senderUsername, senderId, message, limit = 60) {
 }
 
 function normalizeOnlineUser(u) {
-  if (u && typeof u === 'object') {
-    const userId = String(u.userId || '').trim();
-    if (!userId) return null;
-    return { userId, username: String(u.username || userId).trim() || userId };
-  }
-  const userId = String(u || '').trim();
-  return userId ? { userId, username: userId } : null;
+  const userId = String(u?.userId || '').trim();
+  if (!userId) return null;
+  const username = String(u?.username || userId).trim();
+  return { userId, username: username || userId };
 }
 
 function updateUserList(users, count, statuses) {
   const list = Array.isArray(users) ? users : [];
   const normalized = list.map(normalizeOnlineUser).filter(Boolean);
-  const onlineCount = typeof count === 'number' ? count : normalized.length;
+  const onlineCount = count;
   const statusMap = statuses && typeof statuses === 'object' ? statuses : {};
   const statusEntries = Object.entries(statusMap).sort(([a], [b]) => a.localeCompare(b));
   const nextSignature = `${onlineCount}|${normalized.map(u => `${u.userId}:${u.username}`).join(',')}|${statusEntries.map(([k, v]) => `${k}:${v}`).join(',')}`;

@@ -1,10 +1,10 @@
 'use strict';
 
 function commandCards() {
-  return window.CommandHelp?.getCommandCards?.({
+  return window.CommandHelp.getCommandCards({
     isAdmin: App.isAdmin,
     isSuperAdmin: App.isSuperAdmin,
-  }) || [];
+  });
 }
 
 function renderCommandCards(cards) {
@@ -53,8 +53,8 @@ function syncChatChrome(account) {
 
 function renderAdminTimeline(history, allPrivateMessages) {
   const merged = [
-    ...(history || []).map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
-    ...(allPrivateMessages || []).map(pm => ({ kind: 'private-monitor', timestamp: +new Date(pm.timestamp), payload: pm })),
+    ...history.map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
+    ...allPrivateMessages.map(pm => ({ kind: 'private-monitor', timestamp: +new Date(pm.timestamp), payload: pm })),
   ].sort((a, b) => a.timestamp - b.timestamp);
 
   merged.forEach(entry => {
@@ -65,12 +65,12 @@ function renderAdminTimeline(history, allPrivateMessages) {
 
 function renderInitialTimeline(res) {
   byId('chat-box').innerHTML = '';
-  if (App.isAdmin && res.allPrivateMessages?.length) {
+  if (App.isAdmin) {
     renderAdminTimeline(res.history, res.allPrivateMessages);
     return;
   }
-  (res.history || []).forEach(addMsg);
-  (res.privateMessages || []).forEach(addPm);
+  res.history.forEach(addMsg);
+  res.privateMessages.forEach(addPm);
 }
 
 /**
@@ -82,7 +82,7 @@ function enterChat(res) {
   setChatIdentity(account);
   syncChatChrome(account);
   renderInitialTimeline(res);
-  updateUserList(res.users || [], res.userCount || 0, res.userStatuses);
+  updateUserList(res.users, res.userCount, res.userStatuses);
 
   const box = byId('chat-box');
   if (box) {

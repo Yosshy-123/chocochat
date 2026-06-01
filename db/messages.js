@@ -27,9 +27,9 @@ function toMsg(row) {
 
 async function getMessages(limit = MAX_MSG_HISTORY) {
   const res = await pool.query(
-    'SELECT * FROM messages ORDER BY timestamp ASC LIMIT $1', [limit]
+    'SELECT * FROM messages ORDER BY timestamp DESC LIMIT $1', [limit]
   );
-  return res.rows.map(toMsg);
+  return res.rows.reverse().map(toMsg);
 }
 
 async function addMessage(data) {

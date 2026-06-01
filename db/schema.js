@@ -72,14 +72,10 @@ async function createTables(pool) {
       edited_at           TIMESTAMPTZ
     )
   `);
+
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_messages_ts ON messages(timestamp DESC)
   `);
-  await pool.query(`
-    ALTER TABLE messages
-    ADD COLUMN IF NOT EXISTS sender_status VARCHAR(100) NOT NULL DEFAULT ''
-  `);
-
   await pool.query(`
     CREATE TABLE IF NOT EXISTS private_messages (
       id        VARCHAR(36) PRIMARY KEY,
@@ -90,6 +86,7 @@ async function createTables(pool) {
       timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_pm_ts ON private_messages(timestamp DESC)
   `);

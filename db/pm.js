@@ -26,16 +26,16 @@ async function getPrivateMessagesForUser(userId, limit = 200) {
   const res = await pool.query(`
     SELECT * FROM private_messages
     WHERE from_id = $1 OR to_id = $1
-    ORDER BY timestamp ASC LIMIT $2
+    ORDER BY timestamp DESC LIMIT $2
   `, [userId, limit]);
-  return res.rows.map(toPm);
+  return res.rows.reverse().map(toPm);
 }
 
 async function getAllPrivateMessages(limit = 200) {
   const res = await pool.query(
-    'SELECT * FROM private_messages ORDER BY timestamp ASC LIMIT $1', [limit]
+    'SELECT * FROM private_messages ORDER BY timestamp DESC LIMIT $1', [limit]
   );
-  return res.rows.map(toPm);
+  return res.rows.reverse().map(toPm);
 }
 
 async function deletePrivateMessage(id, requesterId, isAdmin = false) {
