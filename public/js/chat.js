@@ -76,17 +76,25 @@ function setProfileSaveStatus(message, isError = false) {
 byId('save-profile').onclick = () => {
   const btn = byId('save-profile');
   const uname = byId('p-uname').value.trim();
+
+  if (!uname) {
+    addSys('ユーザー名を入力してください');
+    setProfileSaveStatus('ユーザー名を入力してください', true);
+    return;
+  }
+
   if (uname.includes('管理者')) {
     addSys('ユーザー名に「管理者」は含められません');
     setProfileSaveStatus('ユーザー名を確認してください', true);
     return;
   }
+
   const updates = {
     color: byId('p-color').value,
     theme: byId('p-theme').value,
     statusText: byId('p-status').value,
+    username: uname,
   };
-  if (uname) updates.username = uname;
 
   btn.disabled = true;
   const originalText = btn.textContent;
