@@ -64,11 +64,21 @@ function addSys(text) {
 
 function addPm(pm) {
   const wrap = document.createElement('div');
-  wrap.className = 'pm-wrap';
+  const isMine = pm.fromId === App.myUserId;
+  wrap.className = `pm-wrap ${isMine ? 'pm-outgoing' : 'pm-incoming'}`;
   wrap.dataset.pmid = pm.id;
-  const dir = pm.fromId === App.myUserId ? `→ ${esc(pm.toId)}` : `← ${esc(pm.fromId)}`;
+
+  const dir = isMine ? `→ ${esc(pm.toId)}` : `← ${esc(pm.fromId)}`;
+  const route = `${esc(pm.fromId || '')} → ${esc(pm.toId || '')}`;
   wrap.innerHTML =
-    `<div class="pm-label">🔒 PM (${dir})</div>` +
+    `<div class="pm-head">
+       <div class="pm-label">🔒 PM</div>
+       <div class="pm-meta">
+         <span class="pm-chip">${dir}</span>
+         <span class="pm-chip">${fmtTime(pm.timestamp)}</span>
+       </div>
+     </div>` +
+    `<div class="pm-route">${route}</div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>` +
     `<div class="msg-actions"><button class="act" data-action="dpm">削除</button></div>`;
   appendToChat(wrap);
@@ -78,9 +88,14 @@ function addPmMonitor(pm) {
   const wrap = document.createElement('div');
   wrap.className = 'pm-monitor';
   wrap.innerHTML =
-    `<div class="pm-mon-label">👁 PM: ${esc(pm.fromId)} → ${esc(pm.toId)}</div>` +
-    `<div class="msg-body">${renderMessageBody(pm.message)}</div>` +
-    `<div class="msg-time">${fmtTime(pm.timestamp)}</div>`;
+    `<div class="pm-head">
+       <div class="pm-mon-label">👁 PM監視</div>
+       <div class="pm-meta">
+         <span class="pm-chip">${esc(pm.fromId || '')} → ${esc(pm.toId || '')}</span>
+         <span class="pm-chip">${fmtTime(pm.timestamp)}</span>
+       </div>
+     </div>` +
+    `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
   appendToChat(wrap);
 }
 

@@ -3,6 +3,7 @@
 socket.on('message', addMsg);
 socket.on('systemMessage', t => { if (typeof t === 'string') addSys(t); });
 socket.on('privateMessage', addPm);
+socket.on('privateMessageSent', addPm);
 socket.on('privateMessageMonitor', addPmMonitor);
 
 socket.on('messageUpdated', m => {
