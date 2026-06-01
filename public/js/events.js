@@ -19,7 +19,7 @@ socket.on('messageUpdated', m => {
 
 socket.on('messageDeleted', ({ id }) => document.querySelector(`.msg[data-msgid="${CSS.escape(id)}"]`)?.remove());
 socket.on('allMessagesDeleted', () => document.querySelectorAll('.msg, .pm-wrap, .pm-monitor, .sys-msg').forEach(e => e.remove()));
-socket.on('privateMessageDeleted', ({ id }) => document.querySelector(`.pm-wrap[data-pmid="${CSS.escape(id)}"]`)?.remove());
+socket.on('privateMessageDeleted', ({ id }) => document.querySelector(`.pm-wrap[data-pmid="${CSS.escape(id)}"], .pm-monitor[data-pmid="${CSS.escape(id)}"]`)?.remove());
 
 socket.on('userJoined', d => {
   addSys(`${d.username} (${d.userId}) が入室しました`);

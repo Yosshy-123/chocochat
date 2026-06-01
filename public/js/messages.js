@@ -87,38 +87,33 @@ function addSys(text) {
 function addPm(pm) {
   const wrap = document.createElement('div');
   const isMine = pm.fromId === App.myUserId;
-  wrap.className = `pm-wrap ${isMine ? 'pm-outgoing' : 'pm-incoming'}`;
+  const senderName = pm.fromUsername || (isMine ? App.myUsername : pm.fromId) || '';
+  wrap.className = `msg pm-wrap ${isMine ? 'pm-outgoing' : 'pm-incoming'}`;
   wrap.dataset.pmid = pm.id;
   wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
 
-  const dir = isMine ? `→ ${esc(pm.toId)}` : `← ${esc(pm.fromId)}`;
-  const route = `${esc(pm.fromId || '')} → ${esc(pm.toId || '')}`;
   wrap.innerHTML =
     `<div class="msg-head pm-head">
-       <span class="pm-label">PM</span>
-       <div class="pm-meta">
-         <span class="pm-chip">${dir}</span>
-         <span class="pm-chip">${fmtTime(pm.timestamp)}</span>
-       </div>
+       <span class="msg-uname">${esc(senderName)}</span>
+       <span class="msg-time">${fmtTime(pm.timestamp)}</span>
      </div>` +
-    `<div class="pm-route">${route}</div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
   insertTimelineItem(wrap);
 }
 
 function addPmMonitor(pm) {
   const wrap = document.createElement('div');
-  wrap.className = 'pm-monitor';
+  const senderName = pm.fromUsername || pm.fromId || '';
+  const targetName = pm.toUsername || pm.toId || '';
+  wrap.className = 'msg pm-monitor';
+  wrap.dataset.pmid = pm.id;
   wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
   wrap.innerHTML =
     `<div class="msg-head pm-head">
-       <span class="pm-mon-label">PM監視</span>
-       <div class="pm-meta">
-         <span class="pm-chip">${esc(pm.fromId || '')} → ${esc(pm.toId || '')}</span>
-         <span class="pm-chip">${fmtTime(pm.timestamp)}</span>
-       </div>
+       <span class="msg-status pm-mon-label">PM監視</span>
+       <span class="msg-uid">${esc(senderName)} → ${esc(targetName)}</span>
+       <span class="msg-time">${fmtTime(pm.timestamp)}</span>
      </div>` +
-    `<div class="pm-route">${esc(pm.fromId || '')} → ${esc(pm.toId || '')}</div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
   insertTimelineItem(wrap);
 }
@@ -128,8 +123,6 @@ byId('chat-box').addEventListener('click', e => {
   if (!btn) return;
   const action = btn.dataset.action;
   const wrap = btn.closest('[data-msgid]');
-  const pmWrap = btn.closest('[data-pmid]');
-
   if (action === 'reply' && wrap) {
     setReply(wrap.dataset.msgid, wrap.dataset.senderId || '', wrap.dataset.senderUsername || '', wrap.dataset.msgtext || '');
   }
