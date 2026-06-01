@@ -87,14 +87,14 @@ function addSys(text) {
 function addPm(pm) {
   const wrap = document.createElement('div');
   const isMine = pm.fromId === App.myUserId;
-  const senderName = pm.fromUsername || (isMine ? App.myUsername : pm.fromId) || '';
   wrap.className = `msg pm-wrap ${isMine ? 'pm-outgoing' : 'pm-incoming'}`;
   wrap.dataset.pmid = pm.id;
   wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
 
   wrap.innerHTML =
     `<div class="msg-head pm-head">
-       <span class="msg-uname">${esc(senderName)}</span>
+       <span class="msg-uname">${esc(pm.fromUsername || pm.fromId || '')}</span>
+       <span class="msg-uid">(${esc(pm.fromId || '')}) → ${esc(pm.toUsername || pm.toId || '')} (${esc(pm.toId || '')})</span>
        <span class="msg-time">${fmtTime(pm.timestamp)}</span>
      </div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
@@ -103,15 +103,14 @@ function addPm(pm) {
 
 function addPmMonitor(pm) {
   const wrap = document.createElement('div');
-  const senderName = pm.fromUsername || pm.fromId || '';
-  const targetName = pm.toUsername || pm.toId || '';
   wrap.className = 'msg pm-monitor';
   wrap.dataset.pmid = pm.id;
   wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
   wrap.innerHTML =
     `<div class="msg-head pm-head">
        <span class="msg-status pm-mon-label">PM監視</span>
-       <span class="msg-uid">${esc(senderName)} → ${esc(targetName)}</span>
+       <span class="msg-uname">${esc(pm.fromUsername || pm.fromId || '')}</span>
+       <span class="msg-uid">(${esc(pm.fromId || '')}) → ${esc(pm.toUsername || pm.toId || '')} (${esc(pm.toId || '')})</span>
        <span class="msg-time">${fmtTime(pm.timestamp)}</span>
      </div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;

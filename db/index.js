@@ -63,6 +63,7 @@ module.exports = {
   logout: accounts.logout,
   updateProfile: accounts.updateProfile,
   getAdminUserIds: accounts.getAdminUserIds,
+  getUsernamesByIds: accounts.getUsernamesByIds,
   setAdminFlag: accounts.setAdminFlag,
 
   // messages

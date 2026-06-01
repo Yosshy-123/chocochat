@@ -132,6 +132,13 @@ async function getAdminUserIds() {
   return res.rows.map(r => r.user_id);
 }
 
+async function getUsernamesByIds(userIds = []) {
+  const ids = [...new Set(userIds.filter(Boolean))];
+  if (ids.length === 0) return {};
+  const res = await pool.query('SELECT user_id, username FROM accounts WHERE user_id = ANY($1)', [ids]);
+  return Object.fromEntries(res.rows.map(r => [r.user_id, r.username]));
+}
+
 module.exports = {
   _setPool,
   signup, login, loginWithToken, logout,
