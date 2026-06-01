@@ -93,8 +93,12 @@ function addPm(pm) {
 
   wrap.innerHTML =
     `<div class="msg-head pm-head">
+       <span class="msg-status pm-mon-label">🔒️ PM</span>
        <span class="msg-uname">${esc(pm.fromUsername || pm.fromId || '')}</span>
-       <span class="msg-uid">(${esc(pm.fromId || '')}) → ${esc(pm.toUsername || pm.toId || '')} (${esc(pm.toId || '')})</span>
+       <span class="msg-uid">(${esc(pm.fromId || '')})</span>
+       <span class="pm-arrow">→</span>
+       <span class="msg-uname">${esc(pm.toUsername || pm.toId || '')}</span>
+       <span class="msg-uid">(${esc(pm.toId || '')})</span>
        <span class="msg-time">${fmtTime(pm.timestamp)}</span>
      </div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
@@ -108,9 +112,12 @@ function addPmMonitor(pm) {
   wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
   wrap.innerHTML =
     `<div class="msg-head pm-head">
-       <span class="msg-status pm-mon-label">PM監視</span>
+       <span class="msg-status pm-mon-label">👁️ PM監視</span>
        <span class="msg-uname">${esc(pm.fromUsername || pm.fromId || '')}</span>
-       <span class="msg-uid">(${esc(pm.fromId || '')}) → ${esc(pm.toUsername || pm.toId || '')} (${esc(pm.toId || '')})</span>
+       <span class="msg-uid">(${esc(pm.fromId || '')})</span>
+       <span class="pm-arrow">→</span>
+       <span class="msg-uname">${esc(pm.toUsername || pm.toId || '')}</span>
+       <span class="msg-uid">(${esc(pm.toId || '')})</span>
        <span class="msg-time">${fmtTime(pm.timestamp)}</span>
      </div>` +
     `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
