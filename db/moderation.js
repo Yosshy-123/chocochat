@@ -5,14 +5,14 @@ const { normalizeIp } = require('../lib/ip');
 let pool = null;
 function _setPool(p) { pool = p; }
 
-async function addBan(userId, bannedById, ip, reason = '') {
+async function addBan(userId, bannedById, ip) {
   const normIp = ip ? normalizeIp(ip) : null;
   await pool.query(
-    `INSERT INTO bans (user_id, banned_ip, banned_by_id, reason)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO bans (user_id, banned_ip, banned_by_id)
+     VALUES ($1, $2, $3)
      ON CONFLICT (user_id)
-     DO UPDATE SET banned_ip=$2, banned_by_id=$3, reason=$4, banned_at=NOW()`,
-    [userId, normIp, bannedById, reason]
+     DO UPDATE SET banned_ip=$2, banned_by_id=$3, banned_at=NOW()`,
+    [userId, normIp, bannedById]
   );
 }
 
@@ -38,21 +38,24 @@ async function isBannedIp(ip) {
 
 async function getBannedUsers() {
   const res = await pool.query(
-    'SELECT user_id, banned_by_id, reason, banned_at FROM bans ORDER BY banned_at DESC'
+    'SELECT user_id, banned_by_id, banned_ip, banned_at FROM bans ORDER BY banned_at DESC'
   );
   return res.rows.map(r => ({
     userId:    r.user_id,
-    bannedById: r.banned_by_id,
-    reason:    r.reason,
+    bannedById: r.banned_by_id || '__system__',
+    bannedIp:  r.banned_ip,
     bannedAt:  r.banned_at,
   }));
 }
 
 async function addShadowBan(userId, bannedById) {
+  const byId = bannedById || '__system__';
   await pool.query(
     `INSERT INTO shadow_bans (user_id, banned_by_id)
-     VALUES ($1,$2) ON CONFLICT (user_id) DO NOTHING`,
-    [userId, bannedById]
+     VALUES ($1, $2)
+     ON CONFLICT (user_id)
+     DO UPDATE SET banned_by_id = EXCLUDED.banned_by_id`,
+    [userId, byId]
   );
 }
 
@@ -63,16 +66,20 @@ async function removeShadowBan(userId) {
   return res.rows.length > 0;
 }
 
-async function getShadowBannedIds() {
-  const res = await pool.query('SELECT user_id FROM shadow_bans');
-  return res.rows.map(r => r.user_id);
+async function getShadowBans() {
+  const res = await pool.query('SELECT user_id, banned_by_id FROM shadow_bans ORDER BY user_id');
+  return res.rows.map(r => ({
+    userId: r.user_id,
+    bannedById: r.banned_by_id || '__system__',
+  }));
 }
 
 async function saveMute(userId, until, mutedById) {
+  const byId = mutedById || '__system__';
   await pool.query(
     `INSERT INTO mutes (user_id, until, muted_by_id) VALUES ($1,$2,$3)
      ON CONFLICT (user_id) DO UPDATE SET until=$2, muted_by_id=$3`,
-    [userId, new Date(until), mutedById]
+    [userId, new Date(until), byId]
   );
 }
 
@@ -86,15 +93,15 @@ async function getActiveMutes() {
     'SELECT user_id, until, muted_by_id FROM mutes WHERE until > NOW()'
   );
   return res.rows.map(r => ({
-    userId:    r.user_id,
-    until:     new Date(r.until).getTime(),
-    mutedById: r.muted_by_id,
+    userId: r.user_id,
+    until: new Date(r.until).getTime(),
+    mutedById: r.muted_by_id || '__system__',
   }));
 }
 
 module.exports = {
   _setPool,
   addBan, removeBan, isBannedUser, isBannedIp, getBannedUsers,
-  addShadowBan, removeShadowBan, getShadowBannedIds,
+  addShadowBan, removeShadowBan, getShadowBans,
   saveMute, clearMute, getActiveMutes
 };

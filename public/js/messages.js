@@ -76,52 +76,48 @@ function refreshReplyPreviews(message) {
   });
 }
 
-function addSys(text) {
-  if (!App.showSys) return;
+function addSys(text, className = '', force = false) {
+  if (!force && !App.showSys) return;
   const el = document.createElement('div');
-  el.className = 'sys-msg';
+  el.className = `sys-msg ${className}`.trim();
   el.textContent = text;
   appendToChat(el);
 }
 
-function addPm(pm) {
+function buildPmWrap(pm, { label, className }) {
   const wrap = document.createElement('div');
   const isMine = pm.fromId === App.myUserId;
-  wrap.className = `msg pm-wrap ${isMine ? 'pm-outgoing' : 'pm-incoming'}`;
-  wrap.dataset.pmid = pm.id;
+  wrap.className = `msg pm-wrap ${className}`.trim();
+  wrap.dataset.pmid = pm.id || '';
   wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
 
-  wrap.innerHTML =
-    `<div class="msg-head pm-head">
-       <span class="msg-status pm-mon-label">🔒️ PM</span>
-       <span class="msg-uname">${esc(pm.fromUsername || pm.fromId || '')}</span>
-       <span class="msg-uid">(${esc(pm.fromId || '')})</span>
-       <span class="pm-arrow">→</span>
-       <span class="msg-uname">${esc(pm.toUsername || pm.toId || '')}</span>
-       <span class="msg-uid">(${esc(pm.toId || '')})</span>
-       <span class="msg-time">${fmtTime(pm.timestamp)}</span>
-     </div>` +
-    `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
-  insertTimelineItem(wrap);
+  const fromName = esc(pm.fromUsername || pm.fromId || '');
+  const fromId = esc(pm.fromId || '');
+  const toName = esc(pm.toUsername || pm.toId || '');
+  const toId = esc(pm.toId || '');
+  const roleClass = isMine ? 'pm-self' : 'pm-other';
+
+  wrap.innerHTML = `
+    <div class="msg-head pm-head ${roleClass}">
+      <span class="msg-status pm-mon-label">${label}</span>
+      <span class="msg-uname">${fromName}</span>
+      <span class="msg-uid">(${fromId})</span>
+      <span class="pm-arrow" aria-hidden="true">→</span>
+      <span class="msg-uname">${toName}</span>
+      <span class="msg-uid">(${toId})</span>
+      <span class="msg-time">${fmtTime(pm.timestamp)}</span>
+    </div>
+    <div class="msg-body">${renderMessageBody(pm.message || '')}</div>`;
+  return wrap;
+}
+
+function addPm(pm) {
+  const className = pm.fromId === App.myUserId ? 'pm-outgoing' : 'pm-incoming';
+  insertTimelineItem(buildPmWrap(pm, { label: '🔒 PM', className }));
 }
 
 function addPmMonitor(pm) {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg pm-monitor';
-  wrap.dataset.pmid = pm.id;
-  wrap.dataset.ts = String(+new Date(pm.timestamp || Date.now()));
-  wrap.innerHTML =
-    `<div class="msg-head pm-head">
-       <span class="msg-status pm-mon-label">👁️ PM監視</span>
-       <span class="msg-uname">${esc(pm.fromUsername || pm.fromId || '')}</span>
-       <span class="msg-uid">(${esc(pm.fromId || '')})</span>
-       <span class="pm-arrow">→</span>
-       <span class="msg-uname">${esc(pm.toUsername || pm.toId || '')}</span>
-       <span class="msg-uid">(${esc(pm.toId || '')})</span>
-       <span class="msg-time">${fmtTime(pm.timestamp)}</span>
-     </div>` +
-    `<div class="msg-body">${renderMessageBody(pm.message)}</div>`;
-  insertTimelineItem(wrap);
+  insertTimelineItem(buildPmWrap(pm, { label: '👁️ PM監視', className: 'pm-monitor' }));
 }
 
 byId('chat-box').addEventListener('click', e => {

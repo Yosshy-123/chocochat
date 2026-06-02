@@ -9,17 +9,16 @@ function toPm(row) {
     fromId:    row.from_id,
     toId:      row.to_id,
     message:   row.message,
-    color:     row.color,
     timestamp: row.timestamp,
   };
 }
 
-async function addPrivateMessage({ id, fromId, toId, message, color, timestamp }) {
+async function addPrivateMessage({ id, fromId, toId, message, timestamp }) {
   await pool.query(`
-    INSERT INTO private_messages (id, from_id, to_id, message, color, timestamp)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO private_messages (id, from_id, to_id, message, timestamp)
+    VALUES ($1, $2, $3, $4, $5)
     ON CONFLICT (id) DO NOTHING
-  `, [id, fromId, toId, message, color || '#000000', timestamp]);
+  `, [id, fromId, toId, message, timestamp]);
 }
 
 async function getPrivateMessagesForUser(userId, limit = 200) {

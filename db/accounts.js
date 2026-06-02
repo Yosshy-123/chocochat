@@ -75,7 +75,7 @@ async function login({ userId, password }) {
 
   const token = crypto.randomBytes(32).toString('hex');
   await pool.query(
-    'UPDATE accounts SET login_token = $1, last_login = NOW() WHERE user_id = $2',
+    'UPDATE accounts SET login_token = $1 WHERE user_id = $2',
     [token, userId]
   );
   return { success: true, account: toAccount(row, token) };
@@ -89,7 +89,6 @@ async function loginWithToken(token) {
     return { success: false, error: 'セッションが無効です' };
 
   const row = res.rows[0];
-  await pool.query('UPDATE accounts SET last_login = NOW() WHERE user_id = $1', [row.user_id]);
   return { success: true, account: toAccount(row, token) };
 }
 

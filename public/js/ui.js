@@ -51,34 +51,42 @@ function syncChatChrome(account) {
   renderCommandGrid();
 }
 
-function renderAdminTimeline(history, allPrivateMessages) {
-  const merged = [
-    ...history.map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
-    ...allPrivateMessages.map(pm => ({ kind: 'private-monitor', timestamp: +new Date(pm.timestamp), payload: pm })),
-  ].sort((a, b) => a.timestamp - b.timestamp);
+function toTimelineEntry(kind, payload) {
+  return {
+    kind,
+    timestamp: +new Date(payload.timestamp || Date.now()),
+    priority: kind === 'message' ? 0 : kind === 'private' ? 1 : 2,
+    payload,
+  };
+}
 
-  merged.forEach(entry => {
+function renderTimeline(entries) {
+  entries.sort((a, b) => a.timestamp - b.timestamp || a.priority - b.priority).forEach(entry => {
     if (entry.kind === 'message') addMsg(entry.payload);
+    else if (entry.kind === 'private') addPm(entry.payload);
     else addPmMonitor(entry.payload);
   });
+}
+
+function renderAdminTimeline(history, ownPrivateMessages, monitorPrivateMessages) {
+  renderTimeline([
+    ...(history || []).map(message => toTimelineEntry('message', message)),
+    ...(ownPrivateMessages || []).map(pm => toTimelineEntry('private', pm)),
+    ...(monitorPrivateMessages || []).map(pm => toTimelineEntry('monitor', pm)),
+  ]);
 }
 
 function renderInitialTimeline(res) {
   byId('chat-box').innerHTML = '';
   if (App.isAdmin) {
-    renderAdminTimeline(res.history, res.allPrivateMessages);
+    renderAdminTimeline(res.history, res.privateMessages, res.monitorPrivateMessages);
     return;
   }
 
-  const merged = [
-    ...res.history.map(message => ({ kind: 'message', timestamp: +new Date(message.timestamp), payload: message })),
-    ...res.privateMessages.map(pm => ({ kind: 'private', timestamp: +new Date(pm.timestamp), payload: pm })),
-  ].sort((a, b) => a.timestamp - b.timestamp);
-
-  merged.forEach(entry => {
-    if (entry.kind === 'message') addMsg(entry.payload);
-    else addPm(entry.payload);
-  });
+  renderTimeline([
+    ...(res.history || []).map(message => toTimelineEntry('message', message)),
+    ...(res.privateMessages || []).map(pm => toTimelineEntry('private', pm)),
+  ]);
 }
 
 /**

@@ -15,9 +15,7 @@ async function createTables(pool) {
       color           VARCHAR(20)  NOT NULL DEFAULT '#000000',
       theme           VARCHAR(20)  NOT NULL DEFAULT '${THEME_SYSTEM}',
       status_text     VARCHAR(100) NOT NULL DEFAULT '',
-      registration_ip VARCHAR(45),
-      created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-      last_login      TIMESTAMPTZ
+      registration_ip VARCHAR(45)
     )
   `);
   await pool.query(`
@@ -30,7 +28,6 @@ async function createTables(pool) {
       user_id      VARCHAR(30)  PRIMARY KEY,
       banned_ip    VARCHAR(45),
       banned_by_id VARCHAR(30)  NOT NULL,
-      reason       VARCHAR(255) NOT NULL DEFAULT '',
       banned_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     )
   `);
@@ -42,8 +39,7 @@ async function createTables(pool) {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS shadow_bans (
       user_id      VARCHAR(30) PRIMARY KEY,
-      banned_by_id VARCHAR(30) NOT NULL,
-      banned_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      banned_by_id VARCHAR(30) NOT NULL DEFAULT '__system__'
     )
   `);
 
@@ -51,7 +47,7 @@ async function createTables(pool) {
     CREATE TABLE IF NOT EXISTS mutes (
       user_id      VARCHAR(30) PRIMARY KEY,
       until        TIMESTAMPTZ NOT NULL,
-      muted_by_id  VARCHAR(30) NOT NULL
+      muted_by_id  VARCHAR(30) NOT NULL DEFAULT '__system__'
     )
   `);
 
@@ -82,9 +78,31 @@ async function createTables(pool) {
       from_id   VARCHAR(30) NOT NULL,
       to_id     VARCHAR(30) NOT NULL,
       message   TEXT        NOT NULL,
-      color     VARCHAR(20) NOT NULL DEFAULT '#000000',
       timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
+  `);
+
+  await pool.query(`
+    ALTER TABLE private_messages DROP COLUMN IF EXISTS color
+  `);
+
+  await pool.query(`
+    ALTER TABLE accounts DROP COLUMN IF EXISTS created_at
+  `);
+  await pool.query(`
+    ALTER TABLE accounts DROP COLUMN IF EXISTS last_login
+  `);
+  await pool.query(`
+    ALTER TABLE bans DROP COLUMN IF EXISTS reason
+  `);
+  await pool.query(`
+    ALTER TABLE shadow_bans DROP COLUMN IF EXISTS banned_at
+  `);
+  await pool.query(`
+    ALTER TABLE shadow_bans ADD COLUMN IF NOT EXISTS banned_by_id VARCHAR(30) NOT NULL DEFAULT '__system__'
+  `);
+  await pool.query(`
+    ALTER TABLE mutes ADD COLUMN IF NOT EXISTS muted_by_id VARCHAR(30) NOT NULL DEFAULT '__system__'
   `);
 
   await pool.query(`

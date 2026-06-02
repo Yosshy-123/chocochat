@@ -8,14 +8,11 @@ const pm = require('./pm');
 const moderation = require('./moderation');
 
 let pool = null;
-let useDatabase = false;
-let dbError = null;
 
 async function initDatabase() {
   const url = process.env.DATABASE_URL;
   if (!url) {
-    dbError = { message: 'DATABASE_URL が未設定です', solution: 'DATABASE_URL を設定してください' };
-    return false;
+    throw new Error('DATABASE_URL が未設定です');
   }
   try {
     pool = new Pool({
@@ -30,15 +27,11 @@ async function initDatabase() {
     [accounts, messages, pm, moderation].forEach(m => m._setPool(pool));
     await schema.createTables(pool);
     await schema.seedAdmin(pool);
-    useDatabase = true;
-    dbError = null;
     return true;
   } catch (err) {
     console.error('[DB] 接続失敗:', err.message);
-    dbError = { message: 'DB 接続エラー', detail: err.message };
     pool = null;
-    useDatabase = false;
-    return false;
+    throw err;
   }
 }
 
@@ -47,15 +40,11 @@ async function closeDatabase() {
     await pool.end().catch(() => {});
     pool = null;
   }
-  useDatabase = false;
 }
 
 module.exports = {
   initDatabase,
   closeDatabase,
-  isUsingDatabase: () => useDatabase,
-  getDbError: () => dbError,
-
   // accounts
   signup: accounts.signup,
   login: accounts.login,
@@ -87,7 +76,7 @@ module.exports = {
   getBannedUsers: moderation.getBannedUsers,
   addShadowBan: moderation.addShadowBan,
   removeShadowBan: moderation.removeShadowBan,
-  getShadowBannedIds: moderation.getShadowBannedIds,
+  getShadowBans: moderation.getShadowBans,
   saveMute: moderation.saveMute,
   clearMute: moderation.clearMute,
   getActiveMutes: moderation.getActiveMutes,

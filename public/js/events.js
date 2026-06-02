@@ -47,13 +47,27 @@ socket.on('userStatusUpdate', d => {
 socket.on('banned', ({ message }) => { localStorage.removeItem('token'); alert(message || 'BANされました'); location.reload(); });
 socket.on('adminGranted', ({ message }) => { alert(message); location.reload(); });
 socket.on('adminRevoked', ({ message }) => { alert(message); location.reload(); });
-socket.on('profileUpdated', d => { if (d.color) setValueById('p-color', d.color); });
 socket.on('error', e => addSys(`エラー: ${typeof e === 'string' ? e : (e?.message || '')}`));
 
+function emitTokenLogin() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  socket.emit('tokenLogin', { token }, onLoginResp);
+}
+
+socket.on('connect', emitTokenLogin);
 socket.on('connect_error', e => { if (e?.message) addSys(`接続エラー: ${e.message}`); });
-socket.on('disconnect', r => {
-  if (['io server disconnect', 'transport close', 'transport error'].includes(r)) socket.connect();
+socket.on('disconnect', reason => {
+  if (!localStorage.getItem('token')) return;
+  addSys(`接続が切断されました${reason ? `（${reason}）` : ''}。再接続を試みます...`, 'sys-connection', true);
+  if (reason === 'io server disconnect') {
+    setTimeout(() => socket.connect(), 250);
+  }
 });
 
-const _token = localStorage.getItem('token');
-if (_token) socket.emit('tokenLogin', { token: _token }, onLoginResp);
+socket.on('reconnect', () => {
+  if (!localStorage.getItem('token')) return;
+  addSys('再接続しました', '', true);
+});
+
+if (socket.connected) emitTokenLogin();
